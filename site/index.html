@@ -53,7 +53,7 @@ header{
   background:color-mix(in srgb, var(--paper) 82%, transparent);
   border-bottom:1px solid var(--line-soft);
 }
-.hrow{display:flex;align-items:center;gap:14px;height:58px}
+.hrow{display:flex;align-items:center;gap:14px;height:58px;overflow:hidden}
 .brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
 .brand svg{display:block}
 .tag{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
@@ -84,7 +84,7 @@ header{
   padding:20px 20px 14px;box-shadow:var(--shadow)}
 .ladder-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
 .ladder-top .hint{font-size:.8rem;color:var(--muted)}
-.axis{position:relative;height:92px;margin:18px 4px 0}
+.axis{position:relative;height:92px;margin:18px 4px 0;overflow:clip}
 .axis .rail{position:absolute;left:0;right:0;top:52px;height:2px;background:var(--line);border-radius:2px}
 .axis .tick{position:absolute;top:47px;width:1px;height:12px;background:var(--line)}
 .axis .tlab{position:absolute;top:66px;transform:translateX(-50%);font-size:.7rem;color:var(--muted);font-family:var(--mono)}
@@ -142,7 +142,7 @@ input:focus,select:focus{outline:none;border-color:color-mix(in srgb,var(--accen
 
 /* ---------- pick ---------- */
 .pick{margin:28px 0 0;display:grid;grid-template-columns:1.25fr 1fr;gap:12px}
-.pick .p{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.pick .p{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
 .pick .p.hl{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));
   background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 9%,var(--card)),var(--card))}
 .pick .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
@@ -193,10 +193,11 @@ td.val{color:var(--good);font-weight:600} tr.mid td.val{color:var(--mid)} tr.bad
 .step .n{font-family:var(--mono);font-size:.75rem;color:var(--accent);letter-spacing:.06em}
 .step h3{margin:8px 0 6px}
 .step p{font-size:.88rem;color:var(--muted)}
+.step{min-width:0}
 .step .formula{margin-top:12px;font-family:var(--mono);font-size:.8rem;background:var(--card-2);border:1px solid var(--line-soft);
-  border-radius:8px;padding:9px 10px;color:var(--ink);overflow-x:auto;white-space:nowrap}
+  border-radius:8px;padding:9px 10px;color:var(--ink);white-space:normal;overflow-wrap:anywhere}
 .explain{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.explain .e{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.explain .e{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
 .explain .e p{font-size:.9rem;color:var(--muted);margin-top:8px}
 .worked{font-family:var(--mono);font-size:.84rem;margin-top:12px;border-left:2px solid var(--accent);padding-left:12px;color:var(--ink)}
 .worked b{color:var(--accent)}
@@ -213,6 +214,8 @@ footer p{max-width:70ch}
 footer a{text-decoration:underline;text-underline-offset:2px}
 
 @media (max-width:900px){
+  .tag{display:none}
+  .hlink{padding:6px 6px;font-size:.82rem}
   .stats{grid-template-columns:repeat(2,1fr)}
   .pick{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr}
@@ -224,7 +227,6 @@ footer a{text-decoration:underline;text-underline-offset:2px}
   .hero{padding-top:40px}
   .chip{font-size:.82rem;padding:7px 11px;gap:7px}
   .controls .box{padding:16px}
-  .tag{display:none}
   .tools{grid-template-columns:1fr}
   .switch{padding-bottom:0}
   thead th,td{padding:10px 9px}
