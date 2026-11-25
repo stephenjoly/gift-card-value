@@ -25,7 +25,7 @@ percentage shifts by the same ratio, so the ranking does not change.
 ```
 build.py        Rebuilds site/cards.js from data/cards.csv (adds categories, recomputes the math)
 data/cards.csv  Store, face value, points, points per $1  (one snapshot)
-site/index.html The whole page: markup, styles, filters, sorting, the dot strip
+site/index.html The whole page: markup, styles, filters, sorting, the rate ruler
 site/cards.js   Generated — never edit by hand
 Dockerfile      nginx:alpine serving site/ with a /healthz probe
 nginx.conf      Static server config
