@@ -24,6 +24,7 @@
   --accent:#a8322a;
   --accent-wash:rgba(168,50,42,.07);
   --hover:rgba(27,26,22,.045);
+  --hl:rgba(27,26,22,.075);
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Charter,Georgia,"Times New Roman",serif;
   --mh:56px;
@@ -41,6 +42,7 @@
     --accent:#e08872;
     --accent-wash:rgba(224,136,114,.09);
     --hover:rgba(239,233,220,.05);
+    --hl:rgba(239,233,220,.08);
   }
 }
 *{box-sizing:border-box}
@@ -107,10 +109,25 @@ h1{font-family:var(--serif);font-size:clamp(30px,4.3vw,42px);line-height:1.14;le
 .scale .base{position:absolute;left:0;right:0;top:56px;height:1px;background:var(--rule-strong)}
 .scale .tick{position:absolute;top:52px;width:1px;height:5px;background:var(--rule-strong)}
 .scale .tlab{position:absolute;top:64px;transform:translateX(-50%);font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
-.scale .dot{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--ink-3);opacity:.72;transform:translate(-50%,-50%)}
-.scale .dot.best{width:7px;height:7px;background:var(--accent);opacity:1}
-.scale .mark{position:absolute;top:2px;transform:translateX(-50%);font-size:12px;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums}
-.scale .stem{position:absolute;top:16px;width:1px;height:32px;background:var(--accent)}
+.scale .dots{position:absolute;inset:0}
+/* Visually 5px, hit area 20px for a mouse and 44px for a finger. */
+.scale .dot{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;padding:0;background:none;border:0;border-radius:50%;cursor:pointer}
+@media (pointer:coarse){.scale .dot{width:44px;height:44px;margin:-22px 0 0 -22px}}
+.scale .dot::before{content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;border-radius:50%;
+  background:var(--ink-3);opacity:.72}
+.scale .dot.best::before{width:7px;height:7px;margin:-3.5px 0 0 -3.5px;background:var(--accent);opacity:1;box-shadow:0 0 0 3px var(--accent-wash)}
+.scale .dot:hover::before,.scale .dot.on::before{opacity:1;background:var(--ink)}
+.scale .dot.best:hover::before,.scale .dot.best.on::before{background:var(--accent)}
+.scale .dot:focus{outline:none}
+.scale .dot:focus-visible::before{outline:2px solid var(--accent);outline-offset:3px}
+.scale .mark{position:absolute;top:2px;transform:translateX(-50%);font-size:12px;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none}
+.scale .stem{position:absolute;top:16px;width:1px;height:32px;background:var(--accent);pointer-events:none}
+.tip{position:absolute;top:86px;z-index:5;transform:translateX(-50%);background:var(--ink);color:var(--paper);
+  padding:8px 10px;border-radius:2px;font-size:12px;line-height:1.45;white-space:nowrap;pointer-events:none;
+  font-variant-numeric:tabular-nums}
+.tip b{font-weight:500}
+.tip .t2{color:color-mix(in srgb,var(--paper) 74%,var(--ink))}
+.ruler-empty{margin:10px 0 0;font-size:12px;color:var(--ink-3)}
 
 /* ---------- toolbar ---------- */
 .toolbar{margin-top:40px;border-top:1px solid var(--rule-strong);padding-top:14px}
@@ -167,6 +184,7 @@ thead th.rank{cursor:default;width:34px;padding-right:4px}
 tbody td{padding:8px 12px;border-bottom:1px solid var(--rule);vertical-align:middle}
 tbody tr td{transition:background-color .12s ease}
 tbody tr:hover td{background:var(--hover)}
+tbody tr.hl td{background:var(--hl)}
 tbody td.num{text-align:right;white-space:nowrap}
 td.rank{width:34px;padding-right:4px;text-align:right;font-size:12px;color:var(--ink-3)}
 .store{font-size:14px;color:var(--ink)}
@@ -299,9 +317,10 @@ footer .stamp{text-align:right;font-variant-numeric:tabular-nums;white-space:now
       <div class="ruler">
         <div class="cap">
           <b>Cash back at 5×</b>
-          <span>one dot per gift card</span>
+          <span id="rulerCount">57 of 82 cards</span>
         </div>
-        <div class="scale" id="scale" aria-hidden="true"></div>
+        <div class="scale" id="scale" role="group" aria-label="Rate ruler: one dot per visible card. Use the left and right arrow keys to step through them."></div>
+        <p class="ruler-empty" id="rulerEmpty" hidden>No cards match this filter. Clear the search or cross a spending type back on.</p>
       </div>
 
       <div class="toolbar">
@@ -362,7 +381,7 @@ footer .stamp{text-align:right;font-variant-numeric:tabular-nums;white-space:now
           <input id="pts" type="number" min="0" step="500" value="50000" inputmode="numeric">
         </div>
       </div>
-      <div class="r-block">
+      <div class="r-block" id="bestBlock">
         <p class="r-label">Best card for what you kept</p>
         <p class="bestname" id="bestname">LEGO $100</p>
         <p class="bestmeta" id="bestmeta">5.41% at 5× · 9,250 points for $100</p>
@@ -468,25 +487,137 @@ footer .stamp{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   ).join('');
 
   /* ---------- rate ruler ---------- */
-  const lo = 4.4, hi = 5.6;
+  const lo = 4.4, hi = 5.6;                        // fixed axis: filtering never rescales it
   const pct = v => ((v - lo) / (hi - lo)) * 100;
   const scale = $('scale');
-  const marks = [];
-  for (let v = lo; v <= hi + 1e-9; v += 0.2) {
-    marks.push(`<span class="tick" style="left:${pct(v)}%"></span>`);
-    marks.push(`<span class="tlab" style="left:${pct(v)}%">${v.toFixed(1)}%</span>`);
+  const dotsBox = document.createElement('div'); dotsBox.className = 'dots';
+  const stemEl = document.createElement('span'); stemEl.className = 'stem'; stemEl.hidden = true;
+  const markEl = document.createElement('span'); markEl.className = 'mark'; markEl.hidden = true;
+  const tipEl = document.createElement('div'); tipEl.className = 'tip'; tipEl.id = 'tip'; tipEl.hidden = true;
+  scale.innerHTML = '<span class="base"></span>' +
+    Array.from({length: 7}, (_, i) => lo + i * 0.2).map(v =>
+      `<span class="tick" style="left:${pct(v)}%"></span><span class="tlab" style="left:${pct(v)}%">${v.toFixed(1)}%</span>`
+    ).join('');
+  scale.append(dotsBox, stemEl, markEl, tipEl);
+
+  const keyOf = c => c.store + '|' + c.face;
+  let dotEls = [];
+
+  function placeLabel(el, xPct){
+    el.hidden = false;
+    el.style.left = xPct + '%';
+    const W = scale.clientWidth, half = el.offsetWidth / 2;
+    if(half * 2 >= W){ el.style.left = '50%'; return; }
+    el.style.left = Math.min(Math.max(xPct / 100 * W, half + 2), W - half - 2) + 'px';
   }
-  const bestCard = cards[0];
-  const bx = pct(bestCard.cb5);
-  const dots = cards.map((c,i) => {
-    const row = i % 3;
-    const top = [56, 49, 42][row];
-    return `<span class="dot" style="left:${pct(c.cb5)}%;top:${top}px"></span>`;
-  }).join('');
-  scale.innerHTML = `<span class="base"></span>${marks.join('')}${dots}
-    <span class="dot best" style="left:${bx}%;top:56px"></span>
-    <span class="stem" style="left:${bx}%"></span>
-    <span class="mark" style="left:${bx}%">${bestCard.label} $${bestCard.face} · ${bestCard.cb5}%</span>`;
+
+  function renderScale(rows){
+    const byPpd = rows.slice().sort((a, b) => a.ppd - b.ppd || a.label.localeCompare(b.label));
+    const rankOf = new Map(byPpd.map((c, i) => [keyOf(c), i + 1]));
+    const bestPpd = byPpd.length ? byPpd[0].ppd : null;
+    dotEls = [];
+    dotsBox.innerHTML = '';
+
+    byPpd.forEach((c, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'dot' + (c.ppd === bestPpd ? ' best' : '');
+      b.style.left = pct(c.cb5) + '%';
+      b.style.top = [56, 49, 42][i % 3] + 'px';
+      b.dataset.key = keyOf(c);
+      b.tabIndex = i === 0 ? 0 : -1;
+      b.setAttribute('aria-label',
+        `${c.label} $${c.face}, rank ${rankOf.get(keyOf(c))} of ${rows.length}. ` +
+        `${fmt(c.points)} points, ${c.ppd.toFixed(2)} points per dollar. ` +
+        `${c.cb5}% back at 5 times, ${c.cb1}% at 1 times.`);
+      b.addEventListener('pointerenter', e => { if(e.pointerType === 'mouse') showTip(b, c, rankOf.get(keyOf(c)), rows.length); });
+      b.addEventListener('pointerleave', e => { if(e.pointerType === 'mouse') hideTip(); });
+      b.addEventListener('focus', () => showTip(b, c, rankOf.get(keyOf(c)), rows.length));
+      b.addEventListener('blur', hideTip);
+      b.addEventListener('click', () => showTip(b, c, rankOf.get(keyOf(c)), rows.length));
+      dotEls.push(b);
+      dotsBox.appendChild(b);
+    });
+
+    $('rulerCount').textContent = `${rows.length} of ${meta.cards} cards`;
+    $('rulerEmpty').hidden = rows.length > 0;
+
+    const best = byPpd[0];
+    if(best){
+      stemEl.style.left = pct(best.cb5) + '%'; stemEl.hidden = false;
+      markEl.textContent = `${best.label} $${best.face} · ${best.cb5}%`;
+      placeLabel(markEl, pct(best.cb5));
+    } else {
+      stemEl.hidden = true; markEl.hidden = true;
+    }
+    hideTip();
+  }
+
+  function showTip(el, c, r, n){
+    tipEl.innerHTML = `<b>${c.label} $${c.face}</b> · #${r} of ${n}<br>` +
+      `<span class="t2">${fmt(c.points)} points · ${c.ppd.toFixed(2)} per $1</span><br>` +
+      `<span class="t2">${c.cb5}% at 5× · ${c.cb1}% at 1×</span>`;
+    tipEl.hidden = false;
+    const W = scale.clientWidth, half = tipEl.offsetWidth / 2;
+    const x = Math.min(Math.max(parseFloat(el.style.left) / 100 * W, half + 2), W - half - 2);
+    tipEl.style.left = x + 'px';
+    dotEls.forEach(d => d.classList.toggle('on', d === el));
+    highlightRow(el.dataset.key);
+  }
+  function hideTip(){
+    tipEl.hidden = true;
+    dotEls.forEach(d => d.classList.remove('on'));
+    highlightRow(null);
+  }
+  function highlightRow(key){
+    const prev = document.querySelector('#tb tr.hl');
+    if(prev) prev.classList.remove('hl');
+    if(!key) return;
+    const row = document.querySelector(`#tb tr[data-key="${key.replace(/"/g, '\\"')}"]`);
+    if(row) row.classList.add('hl');
+  }
+
+  /* A tap that lands between dots picks the nearest one. */
+  scale.addEventListener('click', e => {
+    if(e.target.closest('.dot')) return;
+    const box = scale.getBoundingClientRect();
+    let near = null, bestDist = Infinity;
+    dotEls.forEach(d => {
+      const r = d.getBoundingClientRect();
+      const dx = r.left + r.width / 2 - e.clientX;
+      const dy2 = r.top + r.height / 2 - e.clientY;
+      const dist = dx * dx + dy2 * dy2;
+      if(dist < bestDist){ bestDist = dist; near = d; }
+    });
+    if(near) near.click();
+  });
+  document.addEventListener('click', e => { if(!e.target.closest('.scale')) hideTip(); });
+
+  /* Hovering a ledger row lights its dot, and vice versa. */
+  $('tb').addEventListener('pointerenter', hideTip);
+  $('tb').addEventListener('pointerover', e => {
+    const tr = e.target.closest('tr[data-key]');
+    const d = tr ? dotEls.find(x => x.dataset.key === tr.dataset.key) : null;
+    dotEls.forEach(x => x.classList.toggle('on', x === d));
+  });
+  $('tb').addEventListener('pointerleave', () => dotEls.forEach(x => x.classList.remove('on')));
+
+  /* Arrow keys walk the dots; only one is in the tab order. */
+  dotsBox.addEventListener('keydown', e => {
+    const i = dotEls.indexOf(document.activeElement);
+    if(i < 0) return;
+    let j = null;
+    if(e.key === 'ArrowRight' || e.key === 'ArrowDown') j = Math.min(i + 1, dotEls.length - 1);
+    else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = Math.max(i - 1, 0);
+    else if(e.key === 'Home') j = 0;
+    else if(e.key === 'End') j = dotEls.length - 1;
+    else if(e.key === 'Escape'){ hideTip(); return; }
+    if(j === null || j === i) return;
+    e.preventDefault();
+    dotEls[i].tabIndex = -1;
+    dotEls[j].tabIndex = 0;
+    dotEls[j].focus();
+  });
 
   /* ---------- category switches ---------- */
   const catCount = c => cards.filter(k => k.cat === c).length;
@@ -564,7 +695,7 @@ footer .stamp{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   function renderTable(rows){
     const bestPpd = Math.min(...rows.map(r => r.ppd));
     $('tb').innerHTML = rows.length
-      ? rows.map(c => `<tr class="${c.ppd === bestPpd ? 'best' : ''}">
+      ? rows.map(c => `<tr class="${c.ppd === bestPpd ? 'best' : ''}" data-key="${keyOf(c)}">
           <td class="rank">${c.rank}</td>
           <td class="store">${c.label}<span class="sub">$${c.face} · ${c.ppd.toFixed(2)} pts/$1</span></td>
           <td class="cat-col hide-mid">${c.cat}</td>
@@ -575,22 +706,21 @@ footer .stamp{text-align:right;font-variant-numeric:tabular-nums;white-space:now
           <td class="num val hide-mid${c.value < 100 ? ' below' : ''}">${c.value.toFixed(1)}%</td>
         </tr>`).join('')
       : `<tr class="emptyrow"><td colspan="8"><b>No cards match.</b> Clear the search or cross a spending type back on.</td></tr>`;
-    $('count').textContent = `${rows.length} of ${meta.cards} cards, ${meta.cards - rows.length} crossed off`;
-    $('counts').innerHTML = `${rows.length} of ${meta.cards} cards<span>${meta.cards - rows.length} crossed off · ${new Set(rows.map(r=>r.cat)).size} spending types on</span>`;
+    $('count').textContent = `${rows.length} of ${meta.cards} cards, ${meta.cards - rows.length} hidden`;
+    $('counts').innerHTML = `${rows.length} of ${meta.cards} cards<span>${meta.cards - rows.length} hidden · ${new Set(rows.map(r=>r.cat)).size} spending types on</span>`;
   }
 
-  function renderRail(){
-    const rows = visible();
+  function renderRail(rows){
     if(!rows.length){
-      $('answer').textContent = '—'; $('answer').classList.add('idle');
-      $('ansline').textContent = 'Nothing in the shortlist.';
-      $('arith').textContent = '';
-      $('bestname').textContent = '—';
-      $('bestmeta').textContent = '';
-      $('compare').textContent = '';
+      $('answer').hidden = true;
+      $('arith').hidden = true;
+      $('ansline').textContent = 'No cards match. Clear the search or cross a spending type back on.';
+      $('bestBlock').hidden = true;
       return;
     }
-    $('answer').classList.remove('idle');
+    $('answer').hidden = false;
+    $('arith').hidden = false;
+    $('bestBlock').hidden = false;
     const best = rows.slice().sort((a,b)=>a.ppd-b.ppd)[0];
     const worst = rows.slice().sort((a,b)=>b.ppd-a.ppd)[0];
     const bestBuy = state.pts / best.ppd;
@@ -607,9 +737,10 @@ footer .stamp{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   }
 
   function render(){
-    const rows = sorted(visible());
-    renderTable(rows);
-    renderRail();
+    const rows = visible();
+    renderTable(sorted(rows));
+    renderRail(rows);
+    renderScale(rows);
   }
 
   /* ---------- worked example ---------- */
