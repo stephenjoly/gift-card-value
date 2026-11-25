@@ -157,6 +157,7 @@ input:focus,select:focus{outline:none;border-color:color-mix(in srgb,var(--accen
 .results{margin:44px 0 0}
 .res-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:12px}
 .res-head .count{font-size:.86rem;color:var(--muted);font-family:var(--mono)}
+.mobile-note{display:none;font-size:.8rem;color:var(--muted);margin:0 0 10px}
 .tablewrap{border:1px solid var(--line);border-radius:var(--r);overflow:auto;background:var(--card);box-shadow:var(--shadow);
   max-height:none;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:.92rem}
@@ -223,16 +224,34 @@ footer a{text-decoration:underline;text-underline-offset:2px}
   .notes{grid-template-columns:1fr}
   .tools{grid-template-columns:1fr 1fr}
 }
+/* Below ~1000px the full seven-column table would scroll sideways: show the four deciding columns. */
+@media (max-width:1000px){
+  #t th:nth-child(5),#t td:nth-child(5),#t th:nth-child(7),#t td:nth-child(7){display:none}
+  .store{min-width:0}
+  .vbar{width:48px}
+  #t{font-size:.88rem}
+  .mobile-note{display:block}
+}
 @media (max-width:620px){
   .hero{padding-top:40px}
   .chip{font-size:.82rem;padding:7px 11px;gap:7px}
   .controls .box{padding:16px}
   .tools{grid-template-columns:1fr}
   .switch{padding-bottom:0}
-  thead th,td{padding:10px 9px}
-  .store{min-width:150px}
-  .vbar{width:56px}
+  thead th,td{padding:9px 7px}
+  .store{gap:7px}
+  .store .rank{display:none}
+  .vbar{width:38px;margin-right:5px}
   .hide-sm{display:none}
+  #t{font-size:.84rem}
+}
+@media (max-width:400px){
+  #t th,#t td{padding:8px 5px}
+  #t{font-size:.8rem}
+  .vbar{width:30px;margin-right:4px}
+}
+@media (max-width:520px){
+  .hlink[href="#cards"]{display:none}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation:none !important;transition:none !important}
@@ -326,6 +345,7 @@ footer a{text-decoration:underline;text-underline-offset:2px}
       <h2>The cards</h2>
       <div class="count" id="count"></div>
     </div>
+    <p class="mobile-note">Showing store, card, points and cash back. Points per $1 and the value-vs-1¢ column appear on wider screens.</p>
     <div class="tablewrap">
       <table id="t">
         <thead>
