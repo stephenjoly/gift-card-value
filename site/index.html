@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gift card value checker — what are your MBNA points actually worth?</title>
+<meta name="description" content="82 MBNA Rewards e-gift cards ranked by what your points actually buy. Filter by the spending you actually do and see which cards are worth redeeming for.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0c0f0d">
+<meta property="og:title" content="Gift card value checker — what are your points actually worth?">
+<meta property="og:description" content="82 MBNA Rewards e-gift cards ranked by real redemption value. Turn off the shops you never use; see what's left.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230c0f0d'/%3E%3Cpath d='M8 21l5-7 4 4 7-10' stroke='%234ce08a' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --paper:#0c0f0d; --card:#141917; --card-2:#1a201d; --ink:#f3f6f3; --muted:#9aa8a0;
+  --line:#26302b; --line-soft:#1e2622;
+  --accent:#4ce08a; --good:#4ce08a; --mid:#e8c65a; --bad:#ff8a72;
+  --shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 24px 60px -30px rgba(0,0,0,.9);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --r:16px;
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --paper:#faf8f4; --card:#fff; --card-2:#f3f1ea; --ink:#141813; --muted:#5c6862;
+    --line:#e2ddd2; --line-soft:#ece8de;
+    --accent:#0a7a45; --good:#0a7a45; --mid:#8a6a00; --bad:#b23a22;
+    --shadow:0 1px 2px rgba(20,24,19,.04), 0 18px 40px -28px rgba(20,24,19,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans);
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(900px 500px at 78% -8%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%);
+  background-repeat:no-repeat;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+a{color:inherit}
+h1,h2,h3{line-height:1.1;letter-spacing:-.02em;margin:0}
+h1{font-size:clamp(2.1rem,5.2vw,3.9rem);font-weight:750}
+h2{font-size:clamp(1.35rem,2.6vw,1.9rem);font-weight:700}
+h3{font-size:1.02rem;font-weight:650;letter-spacing:-.01em}
+p{margin:0}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:40;backdrop-filter:blur(14px) saturate(1.4);
+  background:color-mix(in srgb, var(--paper) 82%, transparent);
+  border-bottom:1px solid var(--line-soft);
+}
+.hrow{display:flex;align-items:center;gap:14px;height:58px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+.brand svg{display:block}
+.tag{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.hspacer{flex:1}
+.hlink{font-size:.85rem;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:999px;white-space:nowrap}
+.hlink:hover{color:var(--ink);background:var(--card-2)}
+
+/* ---------- hero ---------- */
+.hero{padding:64px 0 8px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--accent);font-weight:650;margin-bottom:18px}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.hero h1{max-width:20ch}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.lede{margin-top:20px;max-width:60ch;color:var(--muted);font-size:clamp(1rem,1.6vw,1.16rem)}
+.lede strong{color:var(--ink);font-weight:600}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:38px 0 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 16px 14px;box-shadow:var(--shadow)}
+.stat .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:clamp(1.4rem,2.6vw,1.85rem);font-weight:600;margin-top:8px;letter-spacing:-.02em}
+.stat .n{font-size:.78rem;color:var(--muted);margin-top:4px}
+.stat.good .v{color:var(--good)} .stat.bad .v{color:var(--bad)}
+
+/* ---------- ladder ---------- */
+.ladder{margin:34px 0 0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:20px 20px 14px;box-shadow:var(--shadow)}
+.ladder-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ladder-top .hint{font-size:.8rem;color:var(--muted)}
+.axis{position:relative;height:92px;margin:18px 4px 0}
+.axis .rail{position:absolute;left:0;right:0;top:52px;height:2px;background:var(--line);border-radius:2px}
+.axis .tick{position:absolute;top:47px;width:1px;height:12px;background:var(--line)}
+.axis .tlab{position:absolute;top:66px;transform:translateX(-50%);font-size:.7rem;color:var(--muted);font-family:var(--mono)}
+.axis .dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--muted);
+  transform:translate(-50%,-50%);transition:opacity .25s ease, transform .25s ease;cursor:pointer}
+.axis .dot.dim{opacity:.12;pointer-events:none}
+.axis .dot:hover,.axis .dot:focus-visible{transform:translate(-50%,-50%) scale(1.9);outline:none;z-index:3}
+.axis .dot::after{content:"";position:absolute;inset:-6px;border-radius:50%}
+.tip{position:absolute;pointer-events:none;transform:translate(-50%,-140%);background:var(--ink);color:var(--paper);
+  font-size:.74rem;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;transition:opacity .12s}
+.tip.on{opacity:1}
+
+/* ---------- controls ---------- */
+.controls{margin:52px 0 0;scroll-margin-top:80px}
+.controls .box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow)}
+.box-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.box-head p{color:var(--muted);font-size:.88rem;margin-top:5px;max-width:52ch}
+.mini{font:inherit;font-size:.8rem;color:var(--ink);background:var(--card-2);border:1px solid var(--line);
+  border-radius:999px;padding:6px 12px;cursor:pointer}
+.mini:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:.87rem;display:inline-flex;align-items:center;gap:8px;padding:8px 13px;cursor:pointer;
+  background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:999px;
+  transition:background .16s ease,border-color .16s ease,color .16s ease,opacity .16s ease}
+.chip .c{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.chip .tick{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--muted);display:grid;place-items:center;
+  transition:background .16s ease,border-color .16s ease}
+.chip .tick svg{width:9px;height:9px;opacity:0;transition:opacity .16s ease}
+.chip[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 13%,transparent);border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.chip[aria-pressed="true"] .tick{background:var(--accent);border-color:var(--accent)}
+.chip[aria-pressed="true"] .tick svg{opacity:1}
+.chip[aria-pressed="true"] .tick svg path{stroke:var(--paper)}
+.chip[aria-pressed="false"]{color:var(--muted);border-style:dashed}
+.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.tools{display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:12px;align-items:end;margin-top:20px;
+  border-top:1px solid var(--line-soft);padding-top:18px}
+label.f{display:block}
+label.f .k{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:7px}
+input[type=search],input[type=number],select{
+  width:100%;font:inherit;font-size:.94rem;color:var(--ink);background:var(--card-2);border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;appearance:none}
+input:focus,select:focus{outline:none;border-color:color-mix(in srgb,var(--accent) 60%,var(--line));
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding-bottom:9px}
+.switch input{position:absolute;opacity:0;pointer-events:none}
+.switch .track{width:42px;height:24px;border-radius:999px;background:var(--card-2);border:1px solid var(--line);
+  position:relative;transition:background .18s ease,border-color .18s ease;flex:none}
+.switch .track::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+  background:var(--muted);transition:transform .18s cubic-bezier(.3,.9,.3,1),background .18s ease}
+.switch input:checked + .track{background:color-mix(in srgb,var(--accent) 28%,transparent);border-color:color-mix(in srgb,var(--accent) 60%,var(--line))}
+.switch input:checked + .track::after{transform:translateX(18px);background:var(--accent)}
+.switch input:focus-visible + .track{outline:2px solid var(--accent);outline-offset:2px}
+.switch span.lbl{font-size:.9rem}
+
+/* ---------- pick ---------- */
+.pick{margin:28px 0 0;display:grid;grid-template-columns:1.25fr 1fr;gap:12px}
+.pick .p{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.pick .p.hl{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 9%,var(--card)),var(--card))}
+.pick .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.pick .big{font-family:var(--mono);font-size:clamp(1.5rem,3vw,2.1rem);font-weight:600;letter-spacing:-.02em;margin-top:6px}
+.pick .sub{font-size:.86rem;color:var(--muted);margin-top:6px}
+.pick .bar{height:6px;border-radius:99px;background:var(--card-2);margin-top:14px;overflow:hidden}
+.pick .bar i{display:block;height:100%;border-radius:99px;background:var(--accent);width:0;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.alt{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.alt span{font-size:.8rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+
+/* ---------- table ---------- */
+.results{margin:44px 0 0}
+.res-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.res-head .count{font-size:.86rem;color:var(--muted);font-family:var(--mono)}
+.tablewrap{border:1px solid var(--line);border-radius:var(--r);overflow:auto;background:var(--card);box-shadow:var(--shadow);
+  max-height:none;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+thead th{position:sticky;top:0;z-index:2;background:var(--card);border-bottom:1px solid var(--line);
+  padding:11px 12px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+  white-space:nowrap;cursor:pointer;font-weight:600}
+thead th:hover{color:var(--ink)}
+thead th[aria-sort="ascending"],thead th[aria-sort="descending"]{color:var(--accent)}
+thead th .ar{font-size:.7rem;margin-left:4px;opacity:.6}
+tbody td{padding:11px 12px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr{transition:background .15s ease}
+tbody tr:hover{background:var(--card-2)}
+td.r,th.r{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.store{display:flex;align-items:center;gap:10px;min-width:210px}
+.store .nm{font-weight:550}
+.store .rank{font-family:var(--mono);font-size:.72rem;color:var(--muted);width:2ch;text-align:right;flex:none}
+.catpill{font-size:.72rem;color:var(--muted);white-space:nowrap}
+.face{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.vbar{position:relative;width:96px;height:6px;border-radius:99px;background:var(--card-2);overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
+.vbar i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--good);transform-origin:left;transition:width .45s cubic-bezier(.2,.7,.2,1)}
+tr.mid .vbar i{background:var(--mid)} tr.bad .vbar i{background:var(--bad)}
+td.val{color:var(--good);font-weight:600} tr.mid td.val{color:var(--mid)} tr.bad td.val{color:var(--bad)}
+.pct{font-family:var(--mono)}
+.best{display:inline-block;font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--paper);
+  background:var(--accent);border-radius:4px;padding:1px 5px;margin-left:8px;vertical-align:1px}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:.95rem}
+.empty b{color:var(--ink)}
+
+/* ---------- math ---------- */
+.math{margin:64px 0 0}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.step .n{font-family:var(--mono);font-size:.75rem;color:var(--accent);letter-spacing:.06em}
+.step h3{margin:8px 0 6px}
+.step p{font-size:.88rem;color:var(--muted)}
+.step .formula{margin-top:12px;font-family:var(--mono);font-size:.8rem;background:var(--card-2);border:1px solid var(--line-soft);
+  border-radius:8px;padding:9px 10px;color:var(--ink);overflow-x:auto;white-space:nowrap}
+.explain{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.explain .e{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.explain .e p{font-size:.9rem;color:var(--muted);margin-top:8px}
+.worked{font-family:var(--mono);font-size:.84rem;margin-top:12px;border-left:2px solid var(--accent);padding-left:12px;color:var(--ink)}
+.worked b{color:var(--accent)}
+
+/* ---------- notes ---------- */
+.notes{margin:52px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.note{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.note h3{font-size:.95rem;margin-bottom:8px}
+.note ul{margin:0;padding-left:18px;color:var(--muted);font-size:.87rem}
+.note li+li{margin-top:6px}
+footer{margin:56px 0 0;border-top:1px solid var(--line-soft);padding:26px 0 44px;color:var(--muted);font-size:.8rem}
+footer .frow{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+footer p{max-width:70ch}
+footer a{text-decoration:underline;text-underline-offset:2px}
+
+@media (max-width:900px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .pick{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .explain{grid-template-columns:1fr}
+  .notes{grid-template-columns:1fr}
+  .tools{grid-template-columns:1fr 1fr}
+}
+@media (max-width:620px){
+  .hero{padding-top:40px}
+  .chip{font-size:.82rem;padding:7px 11px;gap:7px}
+  .controls .box{padding:16px}
+  .tag{display:none}
+  .tools{grid-template-columns:1fr}
+  .switch{padding-bottom:0}
+  thead th,td{padding:10px 9px}
+  .store{min-width:150px}
+  .vbar{width:56px}
+  .hide-sm{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hrow">
+    <div class="brand">
+      <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 22l6-8 5 5 8-12" stroke="var(--accent)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Gift card value checker
+    </div>
+    <span class="tag">Unofficial · Nov 2026 catalogue</span>
+    <span class="hspacer"></span>
+    <a class="hlink" href="#math">How the math works</a>
+    <a class="hlink" href="#cards">Jump to cards</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow"><span class="dot"></span>82 e-gift cards · 17 types of spending</div>
+    <h1>Same points. <em>Up to 18% more</em> at the right store.</h1>
+    <p class="lede">
+      If you redeem reward points for gift cards, the rate you get is not fixed. $100 of gift-card value
+      costs anywhere from <strong>9,250</strong> to <strong>10,920 points</strong> — the same shopping,
+      priced differently by store and card size. Switch off the places you never shop, and what's left is
+      the short list actually worth redeeming.
+    </p>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="ladder">
+      <div class="ladder-top">
+        <h2 style="font-size:.95rem;font-weight:650">Every card, by cash back at 5×</h2>
+        <span class="hint">Each dot is one gift card · tap one to see it</span>
+      </div>
+      <div class="axis" id="axis">
+        <div class="rail"></div>
+        <div class="tip" id="tip"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="controls" id="controls">
+    <div class="box">
+      <div class="box-head">
+        <div>
+          <h2>Which of these do you actually shop at?</h2>
+          <p>Every type is switched on to start. Tap the ones you don't use to rule them out — the table, the dot strip and your best pick all update.</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="mini" id="allOn" type="button">Switch all on</button>
+          <button class="mini" id="allOff" type="button">Switch all off</button>
+        </div>
+      </div>
+      <div class="chips" id="chips"></div>
+
+      <div class="tools">
+        <label class="f">
+          <span class="k">Search a store</span>
+          <input id="q" type="search" placeholder="e.g. Lego, Sephora, Amazon" autocomplete="off">
+        </label>
+        <label class="f">
+          <span class="k">Your points balance</span>
+          <input id="pts" type="number" min="0" step="500" value="50000" inputmode="numeric">
+        </label>
+        <label class="f">
+          <span class="k">Earn rate on the purchase</span>
+          <select id="mult">
+            <option value="5" selected>5× categories (5 points / $1)</option>
+            <option value="1">1× everything else (1 point / $1)</option>
+          </select>
+        </label>
+        <label class="switch" style="justify-self:start">
+          <input type="checkbox" id="hide25" checked>
+          <span class="track"></span>
+          <span class="lbl">Hide $25 cards</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="pick" id="pick"></div>
+  </section>
+
+  <section class="results" id="cards">
+    <div class="res-head">
+      <h2>The cards</h2>
+      <div class="count" id="count"></div>
+    </div>
+    <div class="tablewrap">
+      <table id="t">
+        <thead>
+          <tr>
+            <th data-k="store">Store<span class="ar"></span></th>
+            <th class="hide-sm" data-k="cat">Spending type<span class="ar"></span></th>
+            <th class="r" data-k="face">Card<span class="ar"></span></th>
+            <th class="r" data-k="points">Points<span class="ar"></span></th>
+            <th class="r" data-k="ppd">Points per $1<span class="ar"></span></th>
+            <th class="r" data-k="cb" aria-sort="descending">Cash back<span class="ar">↓</span></th>
+            <th class="r" data-k="value">Vs. 1¢/point<span class="ar"></span></th>
+          </tr>
+        </thead>
+        <tbody id="tb"></tbody>
+      </table>
+      <div class="empty" id="empty" hidden></div>
+    </div>
+  </section>
+
+  <section class="math" id="math">
+    <h2>How the math works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="n">01</div>
+        <h3>Points buy gift cards at different prices</h3>
+        <p>Each card has a point price. $100 of LEGO costs 9,250 points; $100 of Amazon costs 10,315.
+        That difference is the whole story.</p>
+        <div class="formula">value = face value ÷ points × 100</div>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <h3>Your card's earn rate does the rest</h3>
+        <p>In a 5× category you earn 5 points per $1 spent; everywhere else, 1. Spend $100, redeem the
+        points, and the gift card's price decides your real return.</p>
+        <div class="formula">cash back % = 100 × earn multiple ÷ points per $1</div>
+      </div>
+      <div class="step">
+        <div class="n">03</div>
+        <h3>Bigger cards are always a better deal</h3>
+        <p>Every $25 card in this catalogue is worse per point than the same store's $50 or $100 card.
+        Buy the largest denomination you will genuinely spend.</p>
+        <div class="formula">$25 spread ≈ 0.2 – 0.4 pts worse per $1</div>
+      </div>
+    </div>
+
+    <div class="explain">
+      <div class="e">
+        <h3>Worked example: the same 50,000 points</h3>
+        <p>Same points, different store, different amount of shopping you actually get.</p>
+        <div class="worked" id="worked"></div>
+      </div>
+      <div class="e">
+        <h3>Why the rate isn't the whole decision</h3>
+        <p>A gift card is only worth its face value if you were going to spend there anyway. A 5.4% return at a
+        store you visit twice a year is worse than 4.6% at the shop you use every week — and worse than keeping
+        the points for something you actually need. Use the filters above as a shortlist, not a shopping list.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div class="note">
+      <h3>What this page does not know</h3>
+      <ul>
+        <li>Point prices are from one <b>catalogue snapshot (November 2026)</b> and can change without notice.</li>
+        <li>It assumes no promotional multipliers, no birthday bonus and no cap. Bonuses scale every rate here up or down equally.</li>
+        <li>Only e-gift cards are covered. Travel, statement credits and merchandise redemptions are priced differently.</li>
+        <li>Gift cards carry the usual risk: they can be lost, expire under the issuer's terms, and tie your money to one retailer.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>How to use it in two minutes</h3>
+      <ul>
+        <li>Switch off every spending type you don't use.</li>
+        <li>Leave "Hide $25 cards" on — they are consistently the worst value.</li>
+        <li>Sort by cash back and take the top card at a store you'd visit anyway.</li>
+        <li>Check the card's own points price in your rewards portal before redeeming; it is the only number that matters.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap frow">
+    <p>
+      <b>Unofficial and unaffiliated.</b> Not affiliated with, endorsed by or sponsored by MBNA, its rewards
+      programme, or any retailer named here. Figures come from a single MBNA Rewards e-gift-card catalogue
+      snapshot (November 2026) and are shown for comparison only — <b>not financial advice</b>. Verify current
+      point prices in your own rewards portal before redeeming. No accounts, no cookies for tracking, no
+      analytics; your filters stay in your browser.
+    </p>
+    <p class="mono" style="white-space:nowrap">82 cards · 17 types · Nov 2026</p>
+  </div>
+</footer>
+
+<script src="cards.js"></script>
+<script>
+(function(){
+  const {meta, categories, cards} = window.GC;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- state ---------- */
+  const state = {
+    off: new Set(),          // categories switched off
+    q: '',
+    mult: 5,
+    hide25: true,
+    pts: 50000,
+    sort: 'cb',
+    dir: -1
+  };
+  const catCount = c => cards.filter(k => k.cat === c).length;
+
+  /* ---------- hero stats ---------- */
+  const stats = [
+    {k:'Best cash back at 5×', v: meta.bestCb5 + '%', n: meta.bestStore + ' · $' + meta.bestFace, cls:'good'},
+    {k:'Worst cash back at 5×', v: meta.worstCb5 + '%', n: meta.worstStore + ' · $' + meta.worstFace, cls:'bad'},
+    {k:'Gift cards compared', v: meta.cards, n: meta.stores + ' stores, one catalogue'},
+    {k:'Cards that beat 1¢/point', v: cards.filter(c => c.value >= 100).length, n: 'of ' + meta.cards + ' — the rest are below'}
+  ];
+  document.getElementById('stats').innerHTML = stats.map(s =>
+    `<div class="stat ${s.cls||''}"><div class="k">${s.k}</div><div class="v num">${s.v}</div><div class="n">${s.n}</div></div>`
+  ).join('');
+
+  /* ---------- dot strip ---------- */
+  const axis = document.getElementById('axis');
+  const tip = document.getElementById('tip');
+  const lo = 4.4, hi = 5.6;                       // cash-back domain, padded
+  const pct = v => ((v - lo) / (hi - lo)) * 100;
+  const dots = cards.map((c, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.type = 'button';
+    d.style.left = Math.max(1, Math.min(99, pct(c.cb5))) + '%';
+    d.style.top = (32 + (i % 6) * 6.5) + 'px';
+    d.style.background = c.value >= 100 ? 'var(--good)' : c.value >= 97 ? 'var(--mid)' : 'var(--bad)';
+    d.setAttribute('aria-label', `${c.store} $${c.face}: ${c.cb5}% back`);
+    d.dataset.store = c.store; d.dataset.cat = c.cat; d.dataset.face = c.face; d.dataset.cb = c.cb5;
+    d.addEventListener('mouseenter', ev => showTip(d, `${c.label} $${c.face} · ${c.cb5}%`));
+    d.addEventListener('focus', () => showTip(d, `${c.label} $${c.face} · ${c.cb5}%`));
+    d.addEventListener('mouseleave', hideTip);
+    d.addEventListener('blur', hideTip);
+    d.addEventListener('click', () => { state.q = c.label.toLowerCase(); document.getElementById('q').value = c.label; render(); });
+    if(!reduce){ d.style.opacity = 0; d.style.transform = 'translate(-50%,-50%) scale(.4)'; }
+    return d;
+  });
+  dots.forEach(d => axis.appendChild(d));
+  [4.4,4.6,4.8,5.0,5.2,5.4,5.6].forEach(v => {
+    const t = document.createElement('div'); t.className='tick'; t.style.left = pct(v)+'%'; axis.appendChild(t);
+    const l = document.createElement('div'); l.className='tlab'; l.style.left = pct(v)+'%'; l.textContent = v.toFixed(1)+'%'; axis.appendChild(l);
+  });
+  if(!reduce){
+    dots.forEach((d,i)=> setTimeout(()=>{ d.style.transition='opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1)'; d.style.opacity=1; d.style.transform='translate(-50%,-50%) scale(1)'; }, 120 + i*8));
+  } else { dots.forEach(d => { d.style.opacity = 1; d.style.transform='translate(-50%,-50%)'; }); }
+  function showTip(el, text){
+    const r = el.getBoundingClientRect(), a = axis.getBoundingClientRect();
+    tip.textContent = text; tip.style.left = (r.left - a.left + r.width/2) + 'px';
+    tip.style.top = (r.top - a.top) + 'px'; tip.classList.add('on');
+  }
+  function hideTip(){ tip.classList.remove('on'); }
+
+  /* ---------- chips ---------- */
+  const chips = document.getElementById('chips');
+  const tick = '<span class="tick"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5.2l2.2 2.3L8.6 2.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+  chips.innerHTML = categories.map(c =>
+    `<button class="chip" type="button" role="switch" aria-pressed="true" data-cat="${c.name}" title="${c.note}">
+       ${tick}<span>${c.name}</span><span class="c">${catCount(c.name)}</span>
+     </button>`).join('');
+  chips.addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if(!b) return;
+    const cat = b.dataset.cat;
+    if(state.off.has(cat)) state.off.delete(cat); else state.off.add(cat);
+    b.setAttribute('aria-pressed', state.off.has(cat) ? 'false' : 'true');
+    render();
+  });
+  document.getElementById('allOn').addEventListener('click', () => { state.off.clear(); syncChips(); render(); });
+  document.getElementById('allOff').addEventListener('click', () => { state.off = new Set(categories.map(c=>c.name)); syncChips(); render(); });
+  function syncChips(){ chips.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', state.off.has(b.dataset.cat) ? 'false':'true')); }
+
+  /* ---------- inputs ---------- */
+  document.getElementById('q').addEventListener('input', e => { state.q = e.target.value.trim().toLowerCase(); render(); });
+  document.getElementById('pts').addEventListener('input', e => {
+    const n = Math.max(0, Math.min(50e6, parseInt(e.target.value.replace(/[^0-9]/g,''), 10) || 0));
+    state.pts = n; renderPick();
+  });
+  document.getElementById('mult').addEventListener('change', e => { state.mult = +e.target.value; render(); });
+  document.getElementById('hide25').addEventListener('change', e => { state.hide25 = e.target.checked; render(); });
+
+  /* ---------- sorting ---------- */
+  const ths = [...document.querySelectorAll('#t thead th')];
+  ths.forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.k;
+    if(state.sort === k) state.dir *= -1;
+    else { state.sort = k; state.dir = (k === 'store' || k === 'cat') ? 1 : -1; }
+    ths.forEach(o => o.removeAttribute('aria-sort'));
+    th.setAttribute('aria-sort', state.dir === 1 ? 'ascending' : 'descending');
+    th.querySelector('.ar').textContent = state.dir === 1 ? '↑' : '↓';
+    ths.forEach(o => { if(o !== th) o.querySelector('.ar').textContent = ''; });
+    render();
+  }));
+
+  /* ---------- filtering ---------- */
+  function visible(){
+    return cards.filter(c => {
+      if(state.off.has(c.cat)) return false;
+      if(state.hide25 && c.face === 25) return false;
+      if(state.q && !(c.label.toLowerCase().includes(state.q) || c.cat.toLowerCase().includes(state.q))) return false;
+      return true;
+    });
+  }
+  const cbOf = c => state.mult === 5 ? c.cb5 : c.cb1;
+
+  function sorted(rows){
+    const k = state.sort, d = state.dir;
+    return rows.slice().sort((a,b) => {
+      let x,y;
+      if(k === 'cb'){ x = cbOf(a); y = cbOf(b); }
+      else if(k === 'store') { x = a.label.toLowerCase(); y = b.label.toLowerCase(); }
+      else if(k === 'cat') { x = a.cat; y = b.cat; }
+      else { x = a[k]; y = b[k]; }
+      if(typeof x === 'string') return x.localeCompare(y) * d;
+      return (x - y) * d;
+    });
+  }
+
+  const fmt = n => n.toLocaleString('en-CA');
+
+  function renderTable(rows){
+    const top = rows.slice().sort((a,b)=>a.ppd-b.ppd)[0];
+    document.getElementById('tb').innerHTML = rows.map(c => {
+      const cb = cbOf(c), cls = c.value >= 100 ? '' : (c.value >= 97 ? 'mid' : 'bad');
+      const w = Math.max(6, Math.min(100, (cb - 4.3) / (5.6 - 4.3) * 100));
+      return `<tr class="${cls}">
+        <td><div class="store"><span class="rank">${c.rank}</span><span class="nm">${c.label}${c === top ? '<span class="best">best here</span>' : ''}</span></div></td>
+        <td class="catpill hide-sm">${c.cat}</td>
+        <td class="r"><span class="face">$${c.face}</span></td>
+        <td class="r">${fmt(c.points)}</td>
+        <td class="r">${c.ppd.toFixed(2)}</td>
+        <td class="r"><span class="vbar"><i style="width:${w}%"></i></span><span class="pct">${cb.toFixed(2)}%</span></td>
+        <td class="r val">${c.value.toFixed(1)}%</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('count').textContent = `${rows.length} of ${meta.cards} cards · sorted by ${state.sort === 'cb' ? 'cash back' : state.sort === 'value' ? 'value vs. 1¢/point' : state.sort === 'cat' ? 'spending type' : state.sort === 'store' ? 'store' : state.sort}`;
+    const empty = document.getElementById('empty');
+    if(!rows.length){
+      empty.hidden = false;
+      empty.innerHTML = '<b>Nothing left.</b> Switch a spending type back on, or clear the search.';
+    } else empty.hidden = true;
+  }
+
+  function renderPick(){
+    const rows = visible();
+    const pick = document.getElementById('pick');
+    if(!rows.length){
+      pick.innerHTML = `<div class="p hl"><div class="k">Your best pick</div><div class="big">—</div>
+        <div class="sub">No categories left. Switch some spending back on.</div></div>`;
+      return;
+    }
+    const best = rows.slice().sort((a,b)=>a.ppd-b.ppd)[0];
+    const worst = rows.slice().sort((a,b)=>b.ppd-a.ppd)[0];
+    const bestBuy = state.pts / best.ppd;
+    const worstBuy = state.pts / worst.ppd;
+    const diff = bestBuy - worstBuy;
+    const kept = new Set(rows.map(r => r.cat)).size;
+    pick.innerHTML = `
+      <div class="p hl">
+        <div class="k">Best card for what you kept</div>
+        <div class="big">${best.label} <span style="color:var(--muted);font-size:.6em">$${best.face}</span></div>
+        <div class="sub">${best.cb5}% back at 5× · ${best.cb1}% at 1× · ${fmt(best.points)} points for $${best.face}</div>
+        <div class="bar"><i style="width:${Math.min(100,(best.cb5-4.3)/(5.6-4.3)*100)}%"></i></div>
+        <div class="alt">
+          <span>${kept} spending type${kept===1?'':'s'} on</span>
+          <span>${rows.length} cards eligible</span>
+          <span>${meta.cards - rows.length} ruled out</span>
+        </div>
+      </div>
+      <div class="p">
+        <div class="k">What ${fmt(state.pts)} points buys</div>
+        <div class="big" style="color:var(--good)">$${fmt(Math.round(bestBuy))}</div>
+        <div class="sub">of ${best.label} gift cards, at ${best.cb5}% back${state.mult===1?' at 1×':''}</div>
+        <div class="sub" style="margin-top:10px">Same points at ${worst.label} ($${worst.face}):
+          <b style="color:var(--bad)">$${fmt(Math.round(worstBuy))}</b> — ${diff >= 1 ? '$' + fmt(Math.round(diff)) + ' less' : 'about the same'}.</div>
+        <div class="sub" style="margin-top:10px">Largest card first: ${best.face === 100 ? 'buy $100 cards, not $25' : 'check the $' + best.face + ' price'}. $25 cards are the worst value in every store.</div>
+      </div>`;
+  }
+
+  function render(){
+    const rows = sorted(visible());
+    renderTable(rows);
+    renderPick();
+    // dot strip follows filters
+    const on = new Set(rows.map(r => r.store + '|' + r.face));
+    dots.forEach(d => d.classList.toggle('dim', !on.has(d.dataset.store + '|' + d.dataset.face)));
+  }
+
+  /* ---------- worked example ---------- */
+  const bestAll = cards[0], worstAll = cards[cards.length-1];
+  document.getElementById('worked').innerHTML =
+    `50,000 points<br>→ <b>$${fmt(Math.round(50000/bestAll.ppd))}</b> of ${bestAll.label} (${bestAll.cb5}% back)<br>` +
+    `→ $${fmt(Math.round(50000/worstAll.ppd))} of ${worstAll.label} (${worstAll.cb5}% back)<br>` +
+    `<span style="color:var(--muted)">a $${fmt(Math.round(50000/bestAll.ppd - 50000/worstAll.ppd))} difference for the same points</span>`;
+
+  /* ---------- deep link: ?off=Dining,Travel ---------- */
+  const params = new URLSearchParams(location.search);
+  if(params.get('off')){
+    params.get('off').split(',').map(s=>s.trim()).filter(Boolean).forEach(c => {
+      const hit = categories.find(x => x.name.toLowerCase() === c.toLowerCase());
+      if(hit) state.off.add(hit.name);
+    });
+    syncChips();
+  }
+  render();
+})();
+</script>
+</body>
+</html>
